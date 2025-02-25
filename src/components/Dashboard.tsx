@@ -4,6 +4,7 @@ import {
   Users, 
   BookOpen, 
   Activity, 
+  BarChart3, 
   Clock,
   CheckCircle 
 } from 'lucide-react';
@@ -18,7 +19,7 @@ import {
   BarChart,
   Bar
 } from 'recharts';
-import { DashboardStats, UserActivity, CourseCompletion } from '../types';
+import { DashboardStats, UserActivity, CourseCompletion } from '../types/index';
 
 const Dashboard = () => {
   const [stats] = useState<DashboardStats>({
@@ -89,6 +90,7 @@ const Dashboard = () => {
         </div>
       </div>
 
+      {/* Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
         <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
           <div className="flex items-center gap-4">
@@ -127,6 +129,7 @@ const Dashboard = () => {
         </div>
       </div>
 
+      {/* Charts Section */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
         <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
           <h2 className="text-lg font-semibold mb-4">Course Engagement Trends</h2>
@@ -174,6 +177,7 @@ const Dashboard = () => {
         </div>
       </div>
 
+      {/* Activity Logs */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
           <div className="flex items-center justify-between mb-4">
