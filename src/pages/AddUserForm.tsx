@@ -4,14 +4,14 @@ import React from "react";
 
 interface AddUserFormProps {
   onClose: () => void;
-  refreshUsers: () => Promise<void>; // Ensure this matches the actual function type
+  refreshUsers: () => Promise<void>;
 }
 
 const AddUserForm: React.FC<AddUserFormProps> = ({ onClose, refreshUsers }) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
-  const [role, setRole] = useState("user");
+  const [role, setRole] = useState("user"); // Role selection added
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -20,8 +20,7 @@ const AddUserForm: React.FC<AddUserFormProps> = ({ onClose, refreshUsers }) => {
     setLoading(true);
     setError(null);
 
-    const { data, error } = await supabase.auth.signUp({ email, password }); // ✅ Fix: Access 'data.user'
-    const newUser = data?.user;  // ✅ Ensure we properly access 'user'
+    const { data, error } = await supabase.auth.signUp({ email, password });
 
     if (error) {
       setError(error.message);
@@ -29,6 +28,7 @@ const AddUserForm: React.FC<AddUserFormProps> = ({ onClose, refreshUsers }) => {
       return;
     }
 
+    const newUser = data?.user;
     if (!newUser) {
       setError("User creation failed.");
       setLoading(false);
@@ -43,9 +43,9 @@ const AddUserForm: React.FC<AddUserFormProps> = ({ onClose, refreshUsers }) => {
     if (insertError) {
       setError(insertError.message);
     } else {
-      alert("User added successfully!");
-      await refreshUsers(); // Ensure it's awaited to prevent race conditions
-      onClose();
+      alert(`User ${email} added successfully! ✅`);
+      await refreshUsers(); // Refresh user list
+      onClose(); // Close form after success
     }
 
     setLoading(false);
@@ -53,12 +53,45 @@ const AddUserForm: React.FC<AddUserFormProps> = ({ onClose, refreshUsers }) => {
 
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-      <input type="text" placeholder="Full Name" value={name} onChange={(e) => setName(e.target.value)} required className="border p-2 rounded-lg" />
-      <input type="email" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} required className="border p-2 rounded-lg" />
-      <input type="password" placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} required className="border p-2 rounded-lg" />
+      <input 
+        type="text" 
+        placeholder="Full Name" 
+        value={name} 
+        onChange={(e) => setName(e.target.value)} 
+        required 
+        className="border p-2 rounded-lg" 
+      />
+      <input 
+        type="email" 
+        placeholder="Email" 
+        value={email} 
+        onChange={(e) => setEmail(e.target.value)} 
+        required 
+        className="border p-2 rounded-lg" 
+      />
+      <input 
+        type="password" 
+        placeholder="Password" 
+        value={password} 
+        onChange={(e) => setPassword(e.target.value)} 
+        required 
+        className="border p-2 rounded-lg" 
+      />
+
+      {/* Role Selection Dropdown */}
+      <select
+        value={role}
+        onChange={(e) => setRole(e.target.value)}
+        className="border p-2 rounded-lg"
+      >
+        <option value="user">User</option>
+        <option value="admin">Admin</option>
+      </select>
+
       <button type="submit" disabled={loading} className="bg-green-600 text-white p-2 rounded-lg">
         {loading ? "Creating..." : "Create User"}
       </button>
+      
       {error && <p className="text-red-500">{error}</p>}
     </form>
   );
