@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { format } from 'date-fns';
+import supabase from "../helper/supabaseClient";
 import { 
   Users, 
   BookOpen, 
@@ -80,6 +81,30 @@ const Dashboard = () => {
     { name: 'Sun', views: 140, engagement: 60 }
   ];
 
+  const fetchActiveUsers = async () => {
+    const { count, error } = await supabase
+    .from("users")
+    .select("*", { count: "exact", head: true });
+  
+    if (error) {
+      console.error("Error fetching active users:", error.message);
+      return 0;
+    }
+    return count || 0;
+  };
+
+  const [activeUsers, setActiveUsers] = useState<number | null>(null);
+
+  useEffect(() => {
+    const fetchCount = async () => {
+      const count = await fetchActiveUsers();
+      setActiveUsers(count);
+    };
+
+    fetchCount();
+  }, []);
+  
+
   return (
     <div className="p-6 max-w-7xl mx-auto">
       <div className="flex items-center justify-between mb-8">
@@ -97,7 +122,7 @@ const Dashboard = () => {
             </div>
             <div>
               <p className="text-sm font-medium text-gray-600">Active Users</p>
-              <p className="text-2xl font-bold text-gray-900">{stats.activeUsers}</p>
+              <p className="text-2xl font-bold text-gray-900">{activeUsers !== null ? activeUsers : "Loading..."}</p>
             </div>
           </div>
         </div>
