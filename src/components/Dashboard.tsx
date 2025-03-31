@@ -19,7 +19,7 @@ import {
   BarChart,
   Bar
 } from 'recharts';
-import { DashboardStats, UserActivity, CourseCompletion } from '../types';
+import { DashboardStats} from '../types';
 
 interface Course {
   id: string;
@@ -47,6 +47,7 @@ const Dashboard: React.FC = () =>{
   });
 
   //const [activeUsers, setActiveUsers] = useState<number | null>(null);
+  const [totalCourses, setTotalCourses] = useState<number | null>(null);
   const [courses, setCourses] = useState<Course[]>([]);
   const [users, setUsers] = useState<User[]>([]);
   const [loadingCourses, setLoadingCourses] = useState(true);
@@ -65,15 +66,16 @@ const Dashboard: React.FC = () =>{
 
   const fetchCourses = async () => {
     setLoadingCourses(true);
-    const { data, error } = await supabase
+    const {count: totalCourses, data, error } = await supabase
       .from("courses")
-      .select("id, title, description, duration, classes")
+      .select("id, title, description, duration, classes",  { count: "exact" })
       .limit(2);
 
     if (error) {
       console.error("Error fetching courses:", error.message);
     } else {
       setCourses(data || []);
+      setTotalCourses(totalCourses || 0);
     }
     setLoadingCourses(false);
   };
@@ -163,7 +165,7 @@ const Dashboard: React.FC = () =>{
             </div>
             <div>
               <p className="text-sm font-medium text-gray-600">Total Course</p>
-              <p className="text-2xl font-bold text-gray-900">{stats.averageEngagement}%</p>
+              <p className="text-2xl font-bold text-gray-900">{totalCourses !== null ? totalCourses : "Loading..."}</p>
             </div>
           </div>
         </div>
