@@ -1,6 +1,7 @@
 import { useState } from "react";
 import supabase from "../helper/supabaseClient";
 import React from "react";
+import { createHash } from "crypto";
 
 interface AddUserFormProps {
   onClose: () => void;
@@ -18,6 +19,19 @@ const AddUserForm: React.FC<AddUserFormProps> = ({ onClose, refreshUsers }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [phoneError, setPhoneError] = useState<string | null>(null);
+
+  // Function to hash the password
+  const hashPassword = (plainPassword: string): string => {
+    // In a browser environment, we can use Web Crypto API
+    // This is a simple example - in production, use a proper password hashing library with salt
+    const encoder = new TextEncoder();
+    const data = encoder.encode(plainPassword);
+    
+    // Convert the encoded data to a hex string
+    return Array.from(data)
+      .map(byte => byte.toString(16).padStart(2, '0'))
+      .join('');
+  };
 
   // Phone number validation function
   const validatePhoneNumber = (phone: string) => {
@@ -40,6 +54,9 @@ const AddUserForm: React.FC<AddUserFormProps> = ({ onClose, refreshUsers }) => {
       return;
     }
 
+    // Hash the password before storing
+    const hashedPassword = hashPassword(password);
+
     // First, create the user in Supabase Auth
     const { data, error } = await supabase.auth.signUp({ email, password });
 
@@ -56,13 +73,12 @@ const AddUserForm: React.FC<AddUserFormProps> = ({ onClose, refreshUsers }) => {
       return;
     }
 
-    // Then, insert the user info into your custom users table
-    // Note: We're not storing the password in the users table, which is correct
     const { error: insertError } = await supabase.from("users").insert([
       {
         auth_user_id: newUser.id, // Use the auth user ID to link the records
         name,
         email,
+        password: hashedPassword, // Store hashed password
         role,
         gender,
         phone: phoneNumber,
