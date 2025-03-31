@@ -1,11 +1,11 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import Login from './pages/Login';
-import Dashboard from './pages/Dashboard';
 import UserManagement from './pages/UserManagement';
 import CourseManagement from './pages/CourseManagement';
 import Layout from './components/Layout';
 import { AuthProvider, useAuth } from './context/AuthContext';
+import Dashboard from './components/Dashboard';
 
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { isAuthenticated } = useAuth();

@@ -1,10 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { format } from 'date-fns';
+import supabase from "../helper/supabaseClient";
 import { 
   Users, 
   BookOpen, 
   Activity, 
-  BarChart3, 
   Clock,
   CheckCircle 
 } from 'lucide-react';
@@ -19,9 +19,24 @@ import {
   BarChart,
   Bar
 } from 'recharts';
-import { DashboardStats, UserActivity, CourseCompletion } from '../types/index';
+import { DashboardStats, UserActivity, CourseCompletion } from '../types';
 
-const Dashboard = () => {
+interface Course {
+  id: string;
+  title: string;
+  description: string;
+  duration: string;
+  classes: number;
+}
+
+interface User {
+  email: string;
+  name: string;
+  gender: string;
+  role: string;
+}
+
+const Dashboard: React.FC = () =>{
   const [stats] = useState<DashboardStats>({
     activeUsers: 234,
     totalUsers: 1250,
@@ -30,46 +45,12 @@ const Dashboard = () => {
     completionRate: 82
   });
 
-  const [activities] = useState<UserActivity[]>([
-    {
-      id: 1,
-      user: "Emma Thompson",
-      action: "Started Course",
-      timestamp: "2024-03-10T10:30:00",
-      details: "Introduction to React"
-    },
-    {
-      id: 2,
-      user: "James Wilson",
-      action: "Completed Module",
-      timestamp: "2024-03-10T11:15:00",
-      details: "Advanced JavaScript Concepts"
-    },
-    {
-      id: 3,
-      user: "Sarah Chen",
-      action: "Submitted Assignment",
-      timestamp: "2024-03-10T12:00:00",
-      details: "Final Project"
-    }
-  ]);
+  //const [activeUsers, setActiveUsers] = useState<number | null>(null);
+  const [courses, setCourses] = useState<Course[]>([]);
+  const [users, setUsers] = useState<User[]>([]);
+  const [loadingCourses, setLoadingCourses] = useState(true);
+  const [loadingUsers, setLoadingUsers] = useState(true);
 
-  const [completions] = useState<CourseCompletion[]>([
-    {
-      id: 1,
-      user: "Emma Thompson",
-      courseName: "React Fundamentals",
-      completedAt: "2024-03-09T15:30:00",
-      score: 95
-    },
-    {
-      id: 2,
-      user: "James Wilson",
-      courseName: "JavaScript Mastery",
-      completedAt: "2024-03-10T09:45:00",
-      score: 88
-    }
-  ]);
 
   const engagementData = [
     { name: 'Mon', views: 150, engagement: 65 },
@@ -81,6 +62,64 @@ const Dashboard = () => {
     { name: 'Sun', views: 140, engagement: 60 }
   ];
 
+  const fetchCourses = async () => {
+    setLoadingCourses(true);
+    const { data, error } = await supabase
+      .from("courses")
+      .select("id, title, description, duration, classes")
+      .limit(2);
+
+    if (error) {
+      console.error("Error fetching courses:", error.message);
+    } else {
+      setCourses(data || []);
+    }
+    setLoadingCourses(false);
+  };
+
+  const fetchUsers = async () => {
+    setLoadingUsers(true);
+    const { data, error } = await supabase
+      .from("users")
+      .select("email, name, gender, role")
+      .order("completedCourses", { ascending: false })
+      .limit(2);
+
+    if (error) {
+      console.error("Error fetching top users:", error.message);
+    } else {
+      setUsers(data || []);
+    }
+    setLoadingUsers(false);
+  };
+
+
+  const fetchActiveUsers = async () => {
+    const { count, error } = await supabase
+    .from("users")
+    .select("*", { count: "exact", head: true });
+  
+    if (error) {
+      console.error("Error fetching active users:", error.message);
+      return 0;
+    }
+    return count || 0;
+  };
+
+  const [activeUsers, setActiveUsers] = useState<number | null>(null);
+
+  useEffect(() => {
+    const fetchCount = async () => {
+      const count = await fetchActiveUsers();
+      setActiveUsers(count);
+    };
+
+    fetchCount();
+    fetchCourses();
+    fetchUsers();
+  }, []);
+  
+
   return (
     <div className="p-6 max-w-7xl mx-auto">
       <div className="flex items-center justify-between mb-8">
@@ -90,7 +129,6 @@ const Dashboard = () => {
         </div>
       </div>
 
-      {/* Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
         <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
           <div className="flex items-center gap-4">
@@ -99,7 +137,7 @@ const Dashboard = () => {
             </div>
             <div>
               <p className="text-sm font-medium text-gray-600">Active Users</p>
-              <p className="text-2xl font-bold text-gray-900">{stats.activeUsers}</p>
+              <p className="text-2xl font-bold text-gray-900">{activeUsers !== null ? activeUsers : "Loading..."}</p>
             </div>
           </div>
         </div>
@@ -110,11 +148,12 @@ const Dashboard = () => {
               <BookOpen className="h-6 w-6 text-green-600" />
             </div>
             <div>
-              <p className="text-sm font-medium text-gray-600">Course Views</p>
-              <p className="text-2xl font-bold text-gray-900">{stats.courseViews}</p>
+              <p className="text-sm font-medium text-gray-600">Total Classes</p>
+              <p className="text-2xl font-bold text-gray-900">{activeUsers !== null ? activeUsers : "Loading..."}</p>
             </div>
           </div>
         </div>
+
 
         <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
           <div className="flex items-center gap-4">
@@ -122,14 +161,13 @@ const Dashboard = () => {
               <Activity className="h-6 w-6 text-purple-600" />
             </div>
             <div>
-              <p className="text-sm font-medium text-gray-600">Avg. Engagement</p>
+              <p className="text-sm font-medium text-gray-600">Total Course</p>
               <p className="text-2xl font-bold text-gray-900">{stats.averageEngagement}%</p>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Charts Section */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
         <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
           <h2 className="text-lg font-semibold mb-4">Course Engagement Trends</h2>
@@ -177,61 +215,74 @@ const Dashboard = () => {
         </div>
       </div>
 
-      {/* Activity Logs */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-semibold">Recent Activity</h2>
-            <Clock className="h-5 w-5 text-gray-400" />
-          </div>
-          <div className="space-y-4">
-            {activities.map((activity) => (
-              <div key={activity.id} className="flex items-start gap-4 p-3 rounded-lg hover:bg-gray-50">
-                <div className="p-2 bg-blue-100 rounded-full">
-                  <Activity className="h-4 w-4 text-blue-600" />
-                </div>
-                <div>
-                  <p className="font-medium text-gray-900">{activity.user}</p>
-                  <p className="text-sm text-gray-600">{activity.action}</p>
-                  <p className="text-xs text-gray-500">
-                    {format(new Date(activity.timestamp), 'PPp')}
-                  </p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
 
         <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-semibold">Course Completions</h2>
+            <h2 className="text-lg font-semibold">Trending Courses</h2>
+            <Clock className="h-5 w-5 text-gray-400" />
+          </div>
+          <div className="space-y-4">
+            {loadingCourses ? (
+              <p className="text-gray-500 text-sm">Loading courses...</p>
+            ) : courses.length > 0 ? (
+              courses.map((course) => (
+                <div key={course.id} className="flex items-start gap-4 p-3 rounded-lg hover:bg-gray-50">
+                  <div className="p-2 bg-blue-100 rounded-full">
+                    <BookOpen className="h-4 w-4 text-blue-600" />
+                  </div>
+                  <div>
+                    <p className="font-medium text-gray-900">{course.title}</p>
+                    <p className="text-sm text-gray-600">{course.description}</p>
+                    <p className="text-xs text-gray-500">
+                      {course.duration} mins • {course.classes} classes
+                    </p>
+                  </div>
+                </div>
+              ))
+            ) : (
+              <p className="text-gray-500 text-sm">No courses available.</p>
+            )}
+          </div>
+        </div>
+
+
+
+
+        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-lg font-semibold">Top Users</h2>
             <CheckCircle className="h-5 w-5 text-gray-400" />
           </div>
           <div className="space-y-4">
-            {completions.map((completion) => (
-              <div key={completion.id} className="flex items-start gap-4 p-3 rounded-lg hover:bg-gray-50">
-                <div className="p-2 bg-green-100 rounded-full">
-                  <CheckCircle className="h-4 w-4 text-green-600" />
-                </div>
-                <div>
-                  <p className="font-medium text-gray-900">{completion.user}</p>
-                  <p className="text-sm text-gray-600">{completion.courseName}</p>
-                  <div className="flex items-center gap-2">
-                    <p className="text-xs text-gray-500">
-                      {format(new Date(completion.completedAt), 'PPp')}
+            {loadingUsers ? (
+              <p className="text-gray-500 text-sm">Loading users...</p>
+            ) : users.length > 0 ? (
+              users.map((user) => (
+                <div key={user.email} className="flex items-start gap-4 p-3 rounded-lg hover:bg-gray-50">
+                  <div className="p-2 bg-green-100 rounded-full">
+                    <CheckCircle className="h-4 w-4 text-green-600" />
+                  </div>
+                  <div>
+                    <p className="font-medium text-gray-900">{user.name}</p>
+                    <p className="text-sm text-gray-600">
+                      Completed {user.gender} courses
                     </p>
-                    <span className="text-xs font-medium text-green-600">
-                      Score: {completion.score}%
-                    </span>
+                    <p className="text-xs text-gray-500">
+                      Last completed: {format(new Date(user.role), "PPp")}
+                    </p>
                   </div>
                 </div>
-              </div>
-            ))}
+              ))
+            ) : (
+              <p className="text-gray-500 text-sm">No users available.</p>
+            )}
           </div>
         </div>
+
       </div>
     </div>
   );
 };
 
-export default Dashboard;
+export default Dashboard;  
