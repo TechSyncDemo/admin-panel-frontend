@@ -34,6 +34,7 @@ interface User {
   name: string;
   gender: string;
   role: string;
+  validity: Date;
 }
 
 const Dashboard: React.FC = () =>{
@@ -81,8 +82,8 @@ const Dashboard: React.FC = () =>{
     setLoadingUsers(true);
     const { data, error } = await supabase
       .from("users")
-      .select("email, name, gender, role")
-      .order("completedCourses", { ascending: false })
+      .select("email, name, gender, role, validity")
+      .order("email", { ascending: false })
       .limit(2);
 
     if (error) {
@@ -266,10 +267,10 @@ const Dashboard: React.FC = () =>{
                   <div>
                     <p className="font-medium text-gray-900">{user.name}</p>
                     <p className="text-sm text-gray-600">
-                      Completed {user.gender} courses
+                      Email: {user.email}
                     </p>
                     <p className="text-xs text-gray-500">
-                      Last completed: {format(new Date(user.role), "PPp")}
+                      Valid upto: {user.validity.toString()} | {user.role}
                     </p>
                   </div>
                 </div>
