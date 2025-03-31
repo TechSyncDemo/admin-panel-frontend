@@ -12,17 +12,35 @@ const AddUserForm: React.FC<AddUserFormProps> = ({ onClose, refreshUsers }) => {
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
   const [role, setRole] = useState("user");
-  const [gender, setGender] = useState(""); // New gender field
-  const [phoneNumber, setPhoneNumber] = useState(""); // New phone number field
-  const [validity, setValidity] = useState(""); // New validity date field
+  const [gender, setGender] = useState(""); 
+  const [phoneNumber, setPhoneNumber] = useState(""); 
+  const [validity, setValidity] = useState(""); 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [phoneError, setPhoneError] = useState<string | null>(null);
+
+  // Phone number validation function
+  const validatePhoneNumber = (phone: string) => {
+    if (phone.length < 10) {
+      setPhoneError("Phone number must be at least 10 digits");
+      return false;
+    }
+    setPhoneError(null);
+    return true;
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError(null);
+    
+    // Validate phone number before submission
+    if (!validatePhoneNumber(phoneNumber)) {
+      setLoading(false);
+      return;
+    }
 
+    // First, create the user in Supabase Auth
     const { data, error } = await supabase.auth.signUp({ email, password });
 
     if (error) {
@@ -38,9 +56,11 @@ const AddUserForm: React.FC<AddUserFormProps> = ({ onClose, refreshUsers }) => {
       return;
     }
 
-    // Insert user data into Supabase "users" table with new fields
+    // Then, insert the user info into your custom users table
+    // Note: We're not storing the password in the users table, which is correct
     const { error: insertError } = await supabase.from("users").insert([
       {
+        auth_user_id: newUser.id, // Use the auth user ID to link the records
         name,
         email,
         role,
@@ -60,6 +80,14 @@ const AddUserForm: React.FC<AddUserFormProps> = ({ onClose, refreshUsers }) => {
     }
 
     setLoading(false);
+  };
+  
+  // Handle phone number input change with validation
+  const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    // Allow only digits
+    const phoneDigits = value.replace(/\D/g, '');
+    setPhoneNumber(phoneDigits);
   };
 
   return (
@@ -102,15 +130,19 @@ const AddUserForm: React.FC<AddUserFormProps> = ({ onClose, refreshUsers }) => {
         <option value="other">Other</option>
       </select>
 
-      {/* Phone Number Input */}
-      <input 
-        type="tel" 
-        placeholder="Phone Number" 
-        value={phoneNumber} 
-        onChange={(e) => setPhoneNumber(e.target.value)} 
-        required 
-        className="border p-2 rounded-lg" 
-      />
+      {/* Phone Number Input with validation */}
+      <div>
+        <input 
+          type="tel" 
+          placeholder="Phone Number (minimum 10 digits)" 
+          value={phoneNumber} 
+          onChange={handlePhoneChange}
+          onBlur={() => validatePhoneNumber(phoneNumber)}
+          required 
+          className={`border p-2 rounded-lg w-full ${phoneError ? 'border-red-500' : ''}`} 
+        />
+        {phoneError && <p className="text-red-500 text-sm mt-1">{phoneError}</p>}
+      </div>
 
       {/* Validity Date Input */}
       <input 
