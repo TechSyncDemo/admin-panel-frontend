@@ -47,6 +47,7 @@ const Dashboard: React.FC = () =>{
   });
 
   //const [activeUsers, setActiveUsers] = useState<number | null>(null);
+  const [totalClasses, setTotalClasses] = useState<number>(0);
   const [totalCourses, setTotalCourses] = useState<number | null>(null);
   const [courses, setCourses] = useState<Course[]>([]);
   const [users, setUsers] = useState<User[]>([]);
@@ -63,6 +64,20 @@ const Dashboard: React.FC = () =>{
     { name: 'Sat', views: 120, engagement: 55 },
     { name: 'Sun', views: 140, engagement: 60 }
   ];
+
+  const fetchTotalClasses = async () => {
+    const { data, error } = await supabase
+      .from("courses")
+      .select("classes");
+  
+    if (error) {
+      console.error("Error fetching total classes:", error.message);
+      return;
+    }
+
+    const totalClasses = data.reduce((sum, course) => sum + (course.classes || 0), 0);
+    setTotalClasses(totalClasses);
+  };
 
   const fetchCourses = async () => {
     setLoadingCourses(true);
@@ -120,6 +135,7 @@ const Dashboard: React.FC = () =>{
     fetchCount();
     fetchCourses();
     fetchUsers();
+    fetchTotalClasses();
   }, []);
   
 
@@ -152,7 +168,7 @@ const Dashboard: React.FC = () =>{
             </div>
             <div>
               <p className="text-sm font-medium text-gray-600">Total Classes</p>
-              <p className="text-2xl font-bold text-gray-900">{activeUsers !== null ? activeUsers : "Loading..."}</p>
+              <p className="text-2xl font-bold text-gray-900">{totalClasses !== null ? totalClasses : "Loading..."}</p>
             </div>
           </div>
         </div>
