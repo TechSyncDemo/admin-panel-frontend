@@ -18,11 +18,14 @@ interface User {
 
 const UserManagement = () => {
   const [users, setUsers] = useState<User[]>([]);
+  const [filteredUsers, setFilteredUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");  // 🔍 Search State
 
+  // Fetch Users from Supabase
   const fetchUsers = async () => {
     setLoading(true);
     const { data, error } = await supabase.from("users").select("*");
@@ -31,6 +34,7 @@ const UserManagement = () => {
       console.error("Error fetching users:", error.message);
     } else {
       setUsers(data || []);
+      setFilteredUsers(data || []); // Initially set filtered users
     }
     setLoading(false);
   };
@@ -43,7 +47,9 @@ const UserManagement = () => {
   const handleDelete = async (id: string) => {
     const { error } = await supabase.from("users").delete().eq("id", id);
     if (!error) {
-      setUsers(users.filter((user) => user.id !== id));
+      const updatedUsers = users.filter((user) => user.id !== id);
+      setUsers(updatedUsers);
+      setFilteredUsers(updatedUsers);
     }
   };
 
@@ -51,6 +57,16 @@ const UserManagement = () => {
     setSelectedUser(user);
     setIsEditModalOpen(true);
   };
+
+  // 🔍 Search Function
+  useEffect(() => {
+    const filtered = users.filter(
+      (user) =>
+        user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        user.email.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+    setFilteredUsers(filtered);
+  }, [searchQuery, users]);
 
   return (
     <div className="p-6">
@@ -96,6 +112,8 @@ const UserManagement = () => {
               type="text"
               placeholder="Search users..."
               className="w-full pl-10 pr-4 py-2 border rounded-lg"
+              value={searchQuery} // 🔍 Controlled input
+              onChange={(e) => setSearchQuery(e.target.value)} // 🔍 Update search query
             />
           </div>
         </div>
@@ -125,36 +143,44 @@ const UserManagement = () => {
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {users.map((user) => (
-                <tr key={user.id}>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                    {user.name}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{user.email}</td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-100 text-gray-800">
-                      {user.role}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {new Date(user.validity).toLocaleDateString()}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                    <button 
-                      className="text-blue-600 hover:text-blue-900 mr-3"
-                      onClick={() => handleEditClick(user)}
-                    >
-                      <Edit className="w-4 h-4" />
-                    </button>
-                    <button
-                      onClick={() => handleDelete(user.id)}
-                      className="text-red-600 hover:text-red-900"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
+              {filteredUsers.length > 0 ? (
+                filteredUsers.map((user) => (
+                  <tr key={user.id}>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                      {user.name}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{user.email}</td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-100 text-gray-800">
+                        {user.role}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      {new Date(user.validity).toLocaleDateString()}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                      <button 
+                        className="text-blue-600 hover:text-blue-900 mr-3"
+                        onClick={() => handleEditClick(user)}
+                      >
+                        <Edit className="w-4 h-4" />
+                      </button>
+                      <button
+                        onClick={() => handleDelete(user.id)}
+                        className="text-red-600 hover:text-red-900"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan={5} className="px-6 py-4 text-center text-sm text-gray-500">
+                    No users found.
                   </td>
                 </tr>
-              ))}
+              )}
             </tbody>
           </table>
         )}
