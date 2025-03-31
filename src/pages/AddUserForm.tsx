@@ -12,7 +12,7 @@ const AddUserForm: React.FC<AddUserFormProps> = ({ onClose, refreshUsers }) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
-  const [role, setRole] = useState("user");
+  const [role, setRole] = useState("User");
   const [gender, setGender] = useState(""); 
   const [phoneNumber, setPhoneNumber] = useState(""); 
   const [validity, setValidity] = useState(""); 
@@ -78,7 +78,7 @@ const AddUserForm: React.FC<AddUserFormProps> = ({ onClose, refreshUsers }) => {
         auth_user_id: newUser.id, // Use the auth user ID to link the records
         name,
         email,
-        password: hashedPassword, // Store hashed password
+        password: password,//hashedPassword, // Store hashed password
         role,
         gender,
         phone: phoneNumber,
@@ -141,8 +141,8 @@ const AddUserForm: React.FC<AddUserFormProps> = ({ onClose, refreshUsers }) => {
         className="border p-2 rounded-lg"
       >
         <option value="">Select Gender</option>
-        <option value="male">Male</option>
-        <option value="female">Female</option>
+        <option value="<Male">Male</option>
+        <option value="Female">Female</option>
         <option value="other">Other</option>
       </select>
 
@@ -176,8 +176,8 @@ const AddUserForm: React.FC<AddUserFormProps> = ({ onClose, refreshUsers }) => {
         onChange={(e) => setRole(e.target.value)}
         className="border p-2 rounded-lg"
       >
-        <option value="user">User</option>
-        <option value="admin">Admin</option>
+        <option value="User">User</option>
+        <option value="Admin">Admin</option>
       </select>
 
       <button 
