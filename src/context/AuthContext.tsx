@@ -21,7 +21,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const login = async (email: string, password: string) => {
     // In a real app, this would make an API call
-    if (email === 'deepanjali@gmail.com' && password === 'password') {
+    if (email === 'Roboticsprolab@gmail.com' && password === 'Roboadmin@2025') {
       setIsAuthenticated(true);
     } else {
       throw new Error('Invalid credentials');

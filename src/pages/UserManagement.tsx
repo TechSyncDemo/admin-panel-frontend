@@ -1,14 +1,27 @@
 import { useState, useEffect } from "react";
-import { User } from "../types";
 import supabase from "../helper/supabaseClient";
 import { UserPlus, Edit, Trash2, Search } from "lucide-react";
 import AddUserForm from "../pages/AddUserForm"; 
+import EditUserForm from "../components/EditUser";
 import React from "react";
+
+interface User {
+  id: string;
+  name: string;
+  email: string;
+  password: string;
+  role: string;
+  gender: string;
+  phone: string;
+  validity: string;
+}
 
 const UserManagement = () => {
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [isFormOpen, setIsFormOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [selectedUser, setSelectedUser] = useState<User | null>(null);
 
   const fetchUsers = async () => {
     setLoading(true);
@@ -27,11 +40,16 @@ const UserManagement = () => {
   }, []);
 
   // Delete User Function
-  const handleDelete = async (id: number) => {
+  const handleDelete = async (id: string) => {
     const { error } = await supabase.from("users").delete().eq("id", id);
     if (!error) {
       setUsers(users.filter((user) => user.id !== id));
     }
+  };
+
+  const handleEditClick = (user: User) => {
+    setSelectedUser(user);
+    setIsEditModalOpen(true);
   };
 
   return (
@@ -52,6 +70,20 @@ const UserManagement = () => {
       {isFormOpen && (
         <div className="p-4 border rounded-lg shadow-md bg-white">
           <AddUserForm onClose={() => setIsFormOpen(false)} refreshUsers={fetchUsers} />
+        </div>
+      )}
+
+      {/* Edit Modal */}
+      {isEditModalOpen && selectedUser && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-lg p-6 max-w-md w-full">
+            <h2 className="text-xl font-bold mb-4">Edit User</h2>
+            <EditUserForm
+              user={selectedUser}
+              onClose={() => setIsEditModalOpen(false)}
+              refreshUsers={fetchUsers}
+            />
+          </div>
         </div>
       )}
 
@@ -108,7 +140,10 @@ const UserManagement = () => {
                     {new Date(user.validity).toLocaleDateString()}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                    <button className="text-blue-600 hover:text-blue-900 mr-3">
+                    <button 
+                      className="text-blue-600 hover:text-blue-900 mr-3"
+                      onClick={() => handleEditClick(user)}
+                    >
                       <Edit className="w-4 h-4" />
                     </button>
                     <button
