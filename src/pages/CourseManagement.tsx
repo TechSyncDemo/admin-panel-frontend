@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import supabase from "../helper/supabaseClient";
-import { Plus, Search, Edit, Trash2, BookOpen, X } from "lucide-react";
+import { Plus, Search, Trash2, BookOpen, X } from "lucide-react";
 import AddCourseForm from "../components/AddCourse"; // Import the AddCourseForm component
 
 interface Course {
