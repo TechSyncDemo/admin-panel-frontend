@@ -133,11 +133,12 @@ const Dashboard = () => {
               <BookOpen className="h-6 w-6 text-green-600" />
             </div>
             <div>
-              <p className="text-sm font-medium text-gray-600">Course Views</p>
-              <p className="text-2xl font-bold text-gray-900">{stats.courseViews}</p>
+              <p className="text-sm font-medium text-gray-600">Total Classes</p>
+              <p className="text-2xl font-bold text-gray-900">{activeUsers !== null ? activeUsers : "Loading..."}</p>
             </div>
           </div>
         </div>
+
 
         <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
           <div className="flex items-center gap-4">
@@ -145,7 +146,7 @@ const Dashboard = () => {
               <Activity className="h-6 w-6 text-purple-600" />
             </div>
             <div>
-              <p className="text-sm font-medium text-gray-600">Avg. Engagement</p>
+              <p className="text-sm font-medium text-gray-600">Total Course</p>
               <p className="text-2xl font-bold text-gray-900">{stats.averageEngagement}%</p>
             </div>
           </div>
@@ -202,7 +203,7 @@ const Dashboard = () => {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-semibold">Recent Activity</h2>
+            <h2 className="text-lg font-semibold">Trending Courses</h2>
             <Clock className="h-5 w-5 text-gray-400" />
           </div>
           <div className="space-y-4">
@@ -225,7 +226,7 @@ const Dashboard = () => {
 
         <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-semibold">Course Completions</h2>
+            <h2 className="text-lg font-semibold">Top Users</h2>
             <CheckCircle className="h-5 w-5 text-gray-400" />
           </div>
           <div className="space-y-4">
