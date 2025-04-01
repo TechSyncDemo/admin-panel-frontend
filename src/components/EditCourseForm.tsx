@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import supabase from "../helper/supabaseClient";
-import { Plus, Trash2, Video, Clock, Layout } from 'lucide-react';
+import { Plus, Trash2} from 'lucide-react';
 
 interface Topic {
   id: number;
@@ -132,7 +132,6 @@ const EditCourseForm: React.FC<EditCourseFormProps> = ({ course, onClose, refres
       <div className="bg-white rounded-xl shadow-2xl max-w-4xl w-full max-h-[90vh] flex flex-col">
         <div className="p-6 border-b border-gray-200">
           <h2 className="text-2xl font-bold text-gray-800">Edit Course</h2>
-          <p className="text-gray-600 mt-1">Update the course details</p>
         </div>
 
         <form onSubmit={handleSubmit} className="flex flex-col flex-1 min-h-0">
@@ -161,9 +160,132 @@ const EditCourseForm: React.FC<EditCourseFormProps> = ({ course, onClose, refres
                     required
                   />
                 </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Duration</label>
+                  <input
+                    type="text"
+                    placeholder="Enter course duration"
+                    value={duration}
+                    onChange={(e) => setDuration(e.target.value)}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Classes</label>
+                  <input
+                    type="number"
+                    placeholder="Enter number of classes"
+                    value={classes}
+                    onChange={(e) => setClasses(Number(e.target.value))}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                    required
+                  />
+                </div>
+              </div>
+
+              {/* Sections and Topics */}
+              <div>
+                <h3 className="text-lg font-semibold text-gray-800">Sections</h3>
+                {sections.map((section, sectionIndex) => (
+                  <div key={section.id} className="space-y-4 mt-4">
+                    <div className="flex justify-between items-center">
+                      <input
+                        type="text"
+                        value={section.title}
+                        onChange={(e) => updateSectionTitle(section.id, e.target.value)}
+                        className="w-3/4 px-4 py-2 border border-gray-300 rounded-lg"
+                        placeholder="Enter section title"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => removeSection(section.id)}
+                        className="text-red-500 hover:text-red-700"
+                      >
+                        <Trash2 className="w-5 h-5" />
+                      </button>
+                    </div>
+
+                    <div>
+                      {section.topics.map((topic, topicIndex) => (
+                        <div key={topic.id} className="space-y-3 mt-3 border-t pt-3">
+                          <div className="flex justify-between items-center">
+                            <div className="w-3/4">
+                              <label className="block text-sm font-medium text-gray-700">Topic Name</label>
+                              <input
+                                type="text"
+                                value={topic.name}
+                                onChange={(e) => updateTopic(section.id, topic.id, "name", e.target.value)}
+                                className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+                                placeholder="Enter topic name"
+                              />
+                            </div>
+
+                            <button
+                              type="button"
+                              onClick={() => removeTopic(section.id, topic.id)}
+                              className="text-red-500 hover:text-red-700"
+                            >
+                              <Trash2 className="w-5 h-5" />
+                            </button>
+                          </div>
+
+                          <div className="flex space-x-6">
+                            <div className="w-1/2">
+                              <label className="block text-sm font-medium text-gray-700">Duration</label>
+                              <input
+                                type="number"
+                                value={topic.duration}
+                                onChange={(e) =>
+                                  updateTopic(section.id, topic.id, "duration", Number(e.target.value))
+                                }
+                                className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+                                placeholder="Enter duration (in minutes)"
+                              />
+                            </div>
+
+                            <div className="w-1/2">
+                              <label className="block text-sm font-medium text-gray-700">Video URL</label>
+                              <input
+                                type="text"
+                                value={topic.videoUrl}
+                                onChange={(e) =>
+                                  updateTopic(section.id, topic.id, "videoUrl", e.target.value)
+                                }
+                                className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+                                placeholder="Enter video URL"
+                              />
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={() => addTopic(section.id)}
+                      className="mt-3 inline-flex items-center text-blue-600 hover:text-blue-800"
+                    >
+                      <Plus className="w-5 h-5 mr-2" />
+                      Add Topic
+                    </button>
+                  </div>
+                ))}
+
+                <button
+                  type="button"
+                  onClick={addSection}
+                  className="mt-6 inline-flex items-center text-blue-600 hover:text-blue-800"
+                >
+                  <Plus className="w-5 h-5 mr-2" />
+                  Add Section
+                </button>
               </div>
             </div>
           </div>
+
           <div className="flex justify-end gap-4 p-6 border-t border-gray-200 bg-white">
             {error && <p className="text-red-500 mr-auto">{error}</p>}
             <button
