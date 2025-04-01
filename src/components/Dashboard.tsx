@@ -39,9 +39,9 @@ interface User {
 
 const Dashboard: React.FC = () =>{
   const [stats] = useState<DashboardStats>({
-    activeUsers: 234,
-    totalUsers: 1250,
-    courseViews: 3456,
+    activeUsers: 25,
+    totalUsers: 65,
+    courseViews: 456,
     averageEngagement: 78,
     completionRate: 82
   });
@@ -75,8 +75,10 @@ const Dashboard: React.FC = () =>{
       return;
     }
 
-    const totalClasses = data.reduce((sum, course) => sum + (course.classes || 0), 0);
-    setTotalClasses(totalClasses);
+    const totalClassesCount = data.reduce((sum, course) => sum + Number(course.classes || 0), 0);
+  console.log("Calculated total classes:", totalClassesCount);
+
+    setTotalClasses(totalClassesCount);
   };
 
   const fetchCourses = async () => {
