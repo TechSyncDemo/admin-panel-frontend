@@ -6,6 +6,7 @@ import CourseManagement from './pages/CourseManagement';
 import Layout from './components/Layout';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import Dashboard from './components/Dashboard';
+import UserCoursesScreen from './pages/UserCoursesScreen';
 
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { isAuthenticated } = useAuth();
@@ -34,6 +35,9 @@ function App() {
             <Route index element={<Dashboard />} />
             <Route path="users" element={<UserManagement />} />
             <Route path="courses" element={<CourseManagement />} />
+            import UserCoursesScreen from "./pages/UserCoursesScreen";
+
+<Route path="/user/:userId/courses" element={<UserCoursesScreen />} />
           </Route>
         </Routes>
       </Router>

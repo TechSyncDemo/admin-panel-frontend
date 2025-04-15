@@ -4,6 +4,7 @@ import { UserPlus, Edit, Trash2, Search } from "lucide-react";
 import AddUserForm from "../pages/AddUserForm"; 
 import EditUserForm from "../components/EditUser";
 import React from "react";
+import { useNavigate } from "react-router-dom"; 
 
 interface User {
   id: string;
@@ -42,6 +43,8 @@ const UserManagement = () => {
   useEffect(() => {
     fetchUsers();
   }, []);
+
+  const navigate = useNavigate();
 
   // Delete User Function
   const handleDelete = async (id: string) => {
@@ -124,7 +127,7 @@ const UserManagement = () => {
         ) : (
           <table className="w-full">
             <thead className="bg-gray-50">
-              <tr>
+              <tr>            
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Name
                 </th>
@@ -145,7 +148,10 @@ const UserManagement = () => {
             <tbody className="bg-white divide-y divide-gray-200">
               {filteredUsers.length > 0 ? (
                 filteredUsers.map((user) => (
-                  <tr key={user.id}>
+                  <tr key={user.id}
+                  className="cursor-pointer hover:bg-gray-100 transition"
+              onClick={() => navigate(`/user/${user.id}/courses`)}
+                  >
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                       {user.name}
                     </td>
