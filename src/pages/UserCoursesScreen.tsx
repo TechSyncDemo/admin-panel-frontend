@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useParams } from "react-router-dom";
 import supabase from "../helper/supabaseClient";
 import { fetchCourses } from "../helper/courseHelper"; 
@@ -17,21 +17,40 @@ const UserCoursesScreen: React.FC = () => {
   const [courses, setCourses] = useState<Course[]>([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    fetchUserCourses();
-  }, []);
+//   useEffect(() => {
+//     fetchUserCourses();
+//   }, []);
 
-  const fetchUserCourses = async () => {
+//   const fetchUserCourses = async () => {
+//     setLoading(true);
+//     const data = await fetchCourses(); // ✅ Reuse the shared fetch function
+//     setCourses(
+//       data.map((course) => ({
+//         ...course,
+//         isEnabled: course.enabled_users.includes(userId!), // ✅ Check if user ID exists in enabled_users
+//       }))
+//     );
+//     setLoading(false);
+//   };
+
+const fetchUserCourses = useCallback(async () => {
     setLoading(true);
     const data = await fetchCourses(); // ✅ Reuse the shared fetch function
     setCourses(
       data.map((course) => ({
         ...course,
-        isEnabled: course.enabled_users.includes(userId!), // ✅ Check if user ID exists in enabled_users
+        isEnabled: course.enabled_users.includes(userId!), // ✅ Check if user ID exists
       }))
     );
     setLoading(false);
-  };
+  }, [userId]); // ✅ Dependency is `userId`
+
+  // ✅ useEffect to call fetchUserCourses
+  useEffect(() => {
+    fetchUserCourses(); // Call the memoized function
+  }, [fetchUserCourses]);
+
+
 
   const toggleCourse = async (courseId: string, isEnabled: boolean) => {
     const updatedEnabledUsers = isEnabled
