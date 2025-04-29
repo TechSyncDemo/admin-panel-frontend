@@ -3,7 +3,7 @@ import supabase from "../helper/supabaseClient";
 import { Plus, Search, Trash2, BookOpen, X, Edit } from "lucide-react";
 import AddCourseForm from "../components/AddCourse";
 import EditCourseForm from "../components/EditCourseForm"; // Import EditCourseForm
-import { useNavigate } from "react-router-dom";
+// import { useNavigate } from "react-router-dom";
 
 interface Topic {
   id: number;
@@ -35,7 +35,7 @@ const CourseManagement = () => {
   const [showEditModal, setShowEditModal] = useState(false);
   const [courseToEdit, setCourseToEdit] = useState<Course | null>(null);
 
-  const navigate = useNavigate();
+  // const navigate = useNavigate();
 
   const fetchCourses = async () => {
     setLoading(true);
@@ -63,9 +63,9 @@ const CourseManagement = () => {
     setFilteredCourses(filtered);
   }, [searchQuery, courses]);
 
-  const handleCourseClick = (courseId: string | number) => {
-    navigate(`/courses/${courseId}`);
-  };
+  // const handleCourseClick = (courseId: string | number) => {
+  //   navigate(`/courses/${courseId}`);
+  // };
 
   const handleDeleteCourse = async (courseId: string) => {
     if (!window.confirm("Are you sure you want to delete this course?")) return;
@@ -117,7 +117,8 @@ const CourseManagement = () => {
             <tbody className="bg-white divide-y divide-gray-200">
               {filteredCourses.map((course) => (
                 <tr key={course.id}
-                onClick={() => handleCourseClick(course.id)}>  
+                // onClick={() => handleCourseClick(course.id)}
+                >  
                   <td className="px-6 py-4 flex items-center">
                     <BookOpen className="h-5 w-5 text-blue-600" />
                     <div className="ml-4">

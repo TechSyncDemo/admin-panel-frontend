@@ -18,7 +18,7 @@ export const fetchEnabledStudents = async (courseId: string): Promise<any[]> => 
     const { data: students, error: studentError } = await supabase
       .from("students")
       .select("*")
-      .in("id", enabledUserIds);
+      .in("user_id", enabledUserIds);
 
     if (studentError) {
       console.error("Error fetching students:", studentError.message);
