@@ -8,6 +8,7 @@ import { AuthProvider, useAuth } from './context/AuthContext';
 import Dashboard from './components/Dashboard';
 import UserCoursesScreen from './pages/UserCoursesScreen';
 import CourseDetails from './pages/CourseDetails';
+import UserDetails from './pages/UserDetails';
 
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { isAuthenticated } = useAuth();
@@ -37,8 +38,8 @@ function App() {
             <Route path="users" element={<UserManagement />} />
             <Route path="courses" element={<CourseManagement />} />
             <Route path="/courses/:courseId" element={<CourseDetails />} />
-
-<Route path="/user/:userId/courses" element={<UserCoursesScreen />} />
+            <Route path="/users/:userId" element={<UserDetails />} />
+            <Route path="/user/:userId/courses" element={<UserCoursesScreen />} />
           </Route>
         </Routes>
       </Router>

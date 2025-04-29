@@ -1,5 +1,12 @@
 import supabase from "./supabaseClient";
 
+interface Student {
+    id: number;
+    name: string;
+    user_id: string;
+    // Add any other fields you might have in the students table
+  }
+
 export const fetchEnabledStudents = async (courseId: string): Promise<any[]> => {
   try {
     const { data, error } = await supabase
@@ -31,3 +38,24 @@ export const fetchEnabledStudents = async (courseId: string): Promise<any[]> => 
     return [];
   }
 };
+
+
+
+export const fetchStudentsByUserId = async (userId: string): Promise<Student[]> => {
+    try {
+      const { data, error } = await supabase
+        .from("students") // Query the students table
+        .select("*")
+        .eq("user_id", userId); // Match the user_id column with the provided userId
+  
+      if (error) {
+        console.error("Error fetching students by user ID:", error.message);
+        return [];
+      }
+  
+      return data || []; // Return students or an empty array
+    } catch (err) {
+      console.error("Unexpected error:", err);
+      return [];
+    }
+  };

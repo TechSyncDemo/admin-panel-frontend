@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import supabase from "../helper/supabaseClient";
-import { UserPlus, Edit, Trash2, Search } from "lucide-react";
+import { UserPlus, Edit, Trash2, Search, View } from "lucide-react";
 import AddUserForm from "../pages/AddUserForm"; 
 import EditUserForm from "../components/EditUser";
 import React from "react";
@@ -47,7 +47,8 @@ const UserManagement = () => {
   const navigate = useNavigate();
 
   // Delete User Function
-  const handleDelete = async (id: string) => {
+  const handleDelete = async (id: string, e: React.MouseEvent) => {
+    e.stopPropagation(); // Stop event from bubbling up to the row
     const { error } = await supabase.from("users").delete().eq("id", id);
     if (!error) {
       const updatedUsers = users.filter((user) => user.id !== id);
@@ -56,9 +57,20 @@ const UserManagement = () => {
     }
   };
 
-  const handleEditClick = (user: User) => {
+  const handleUserClick = (userId: string) => {
+    navigate(`/user/${userId}/courses`); // Navigates to UserDetails with userId
+  };
+
+  const handleEditClick = (user: User, e: React.MouseEvent) => {
+    e.stopPropagation(); // Stop event from bubbling up to the row
     setSelectedUser(user);
     setIsEditModalOpen(true);
+  };
+
+  // Handle view details button click
+  const handleViewDetailsClick = (userId: string, e: React.MouseEvent) => {
+    e.stopPropagation(); // Stop event from bubbling up
+    navigate(`/users/${userId}`);
   };
 
   // 🔍 Search Function
@@ -115,8 +127,8 @@ const UserManagement = () => {
               type="text"
               placeholder="Search users..."
               className="w-full pl-10 pr-4 py-2 border rounded-lg"
-              value={searchQuery} // 🔍 Controlled input
-              onChange={(e) => setSearchQuery(e.target.value)} // 🔍 Update search query
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
             />
           </div>
         </div>
@@ -148,9 +160,10 @@ const UserManagement = () => {
             <tbody className="bg-white divide-y divide-gray-200">
               {filteredUsers.length > 0 ? (
                 filteredUsers.map((user) => (
-                  <tr key={user.id}
-                  className="cursor-pointer hover:bg-gray-100 transition"
-              onClick={() => navigate(`/user/${user.id}/courses`)}
+                  <tr 
+                    key={user.id}
+                    className="cursor-pointer hover:bg-gray-100 transition"
+                    onClick={() => handleUserClick(user.id)}
                   >
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                       {user.name}
@@ -167,15 +180,21 @@ const UserManagement = () => {
                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                       <button 
                         className="text-blue-600 hover:text-blue-900 mr-3"
-                        onClick={() => handleEditClick(user)}
+                        onClick={(e) => handleEditClick(user, e)}
                       >
                         <Edit className="w-4 h-4" />
                       </button>
                       <button
-                        onClick={() => handleDelete(user.id)}
-                        className="text-red-600 hover:text-red-900"
+                        onClick={(e) => handleDelete(user.id, e)}
+                        className="text-red-600 hover:text-red-900 mr-3"
                       >
                         <Trash2 className="w-4 h-4" />
+                      </button>
+                      <button 
+                        className="text-green-600 hover:text-green-900"
+                        onClick={(e) => handleViewDetailsClick(user.id, e)}
+                      >
+                        <View className="w-4 h-4" />
                       </button>
                     </td>
                   </tr>
