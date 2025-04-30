@@ -1,9 +1,17 @@
 import supabase from "./supabaseClient";
 
+interface Course {
+  name: string;
+  status: string;
+}
+
+
 interface Student {
     id: number;
+    phone: string;
     name: string;
     user_id: string;
+    courses: Course[];
     // Add any other fields you might have in the students table
   }
 
